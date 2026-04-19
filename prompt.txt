@@ -1,0 +1,31 @@
+Here's some Python code to read the temperature and humidity values from a dallas semiconductor onewire temperature sensor:
+
+while True:
+    try:
+        f.write(b'\xA5\x00\x01') # Turn on LED
+        f.seek(0)
+
+        f.write(b'\xB4') # Start sensor conversion cycle
+        f.seek(0)
+
+        time.sleep(1) # Wait 1 second for conversion cycle to complete
+
+        f.write(b'\xA5\x00\x00') # Turn off LED
+        f.seek(0)
+
+        f.write(b'\xF0\x00') # Read the sensor memory
+        binData = f.read(33)
+        byteList = list(binData)
+        #print(byteList)
+        temp = ''.join(map(chr,byteList[15:22]))
+        humidity = ''.join(map(chr,byteList[22:29]))
+        print(str(datetime.now()) + ',' + temp + ',' + humidity)
+    except KeyboardInterrupt:
+        f.close()
+
+This code will print the temperature and humidity values to the console along with the date and time every 1 second. 
+
+
+I want a web interface that updates real time with the temperature and humidity values. It should display the current temperature and humidity values 
+and update them every 1 second. It should also display a graph of the temperature and humidity values over time. The graph should update every 1 second. 
+The web interface should be accessible from any device on the network. 

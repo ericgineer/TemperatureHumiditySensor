@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Real-Time Environment</title>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/static/style.css">
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+    <div class="glass-container">
+        <header>
+            <h1>Environment Dashboard</h1>
+            <div class="status">
+                <div class="indicator" id="connection-status"></div>
+                <span id="status-text">Connecting...</span>
+            </div>
+        </header>
+
+        <div class="metrics">
+            <div class="metric-card">
+                <h2>Temperature</h2>
+                <div class="value">
+                    <span id="temp-val">--</span><span class="unit">°C</span>
+                </div>
+                <div class="glow temp-glow"></div>
+            </div>
+            
+            <div class="metric-card">
+                <h2>Humidity</h2>
+                <div class="value">
+                    <span id="hum-val">--</span><span class="unit">%</span>
+                </div>
+                <div class="glow hum-glow"></div>
+            </div>
+        </div>
+
+        <div class="chart-container">
+            <canvas id="envChart"></canvas>
+        </div>
+    </div>
+    
+    <script src="/static/app.js"></script>
+</body>
+</html>
