@@ -13,9 +13,12 @@
     <div class="glass-container">
         <header>
             <h1>Environment Dashboard</h1>
-            <div class="status">
-                <div class="indicator" id="connection-status"></div>
-                <span id="status-text">Connecting...</span>
+            <div style="display: flex; gap: 1.5rem; align-items: center;">
+                <a href="/download" class="download-btn">Download CSV</a>
+                <div class="status">
+                    <div class="indicator" id="connection-status"></div>
+                    <span id="status-text">Connecting...</span>
+                </div>
             </div>
         </header>
 
@@ -23,7 +26,7 @@
             <div class="metric-card">
                 <h2>Temperature</h2>
                 <div class="value">
-                    <span id="temp-val">--</span><span class="unit">°C</span>
+                    <span id="temp-val">--</span><span class="unit">°F</span>
                 </div>
                 <div class="glow temp-glow"></div>
             </div>

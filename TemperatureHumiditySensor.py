@@ -5,7 +5,7 @@ import threading
 from datetime import datetime
 from fastapi import FastAPI, WebSocket, WebSocketDisconnect
 from fastapi.staticfiles import StaticFiles
-from fastapi.responses import FileResponse
+from fastapi.responses import FileResponse, Response
 import uvicorn
 import os
 
@@ -43,6 +43,7 @@ class ConnectionManager:
 
 manager = ConnectionManager()
 latest_data = {"temp": None, "humidity": None, "timestamp": None}
+history_data = []
 
 def sensor_reader_loop():
     global latest_data
@@ -78,9 +79,9 @@ def sensor_reader_loop():
                 # Mock data if running on a machine without the 1-Wire device
                 import random
                 time.sleep(1)
-                base_temp = 25.0
+                base_temp_f = 77.0 # 25 C
                 base_hum = 50.0
-                temp = str(round(base_temp + random.uniform(-1, 1), 2))
+                temp = str(round(base_temp_f + random.uniform(-1, 1), 2))
                 humidity = str(round(base_hum + random.uniform(-2, 2), 2))
                 
             latest_data = {
@@ -88,6 +89,7 @@ def sensor_reader_loop():
                 "humidity": humidity,
                 "timestamp": timestamp
             }
+            history_data.append(latest_data)
             # For logging
             # print(f"{timestamp}, {temp}, {humidity}")
         except Exception as e:
@@ -110,6 +112,26 @@ async def broadcast_data():
         await asyncio.sleep(1)
         if latest_data["temp"] is not None:
             await manager.broadcast(json.dumps(latest_data))
+
+@app.get("/history")
+async def get_history():
+    return {"history": history_data}
+
+@app.get("/download")
+async def download_csv():
+    # first column of CSV file is the date, the second colunm is the time, the third colunm is the temperature, and the fourth colunm is the humidity
+    lines = ["Date,Time,Temperature (F),Humidity (%)"]
+    for data in history_data:
+        try:
+            # timestamp format: '2026-04-19 17:05:02.123456'
+            dt = datetime.fromisoformat(data["timestamp"])
+            date_str = dt.strftime("%Y-%m-%d")
+            time_str = dt.strftime("%H:%M:%S")
+            lines.append(f"{date_str},{time_str},{data['temp']},{data['humidity']}")
+        except Exception:
+            pass
+    csv_content = "\n".join(lines)
+    return Response(content=csv_content, media_type="text/csv", headers={"Content-Disposition": "attachment; filename=sensor_data.csv"})
 
 @app.websocket("/ws")
 async def websocket_endpoint(websocket: WebSocket):

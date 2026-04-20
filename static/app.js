@@ -17,8 +17,6 @@ document.addEventListener('DOMContentLoaded', () => {
     gradientHum.addColorStop(0, 'rgba(59, 130, 246, 0.5)');
     gradientHum.addColorStop(1, 'rgba(59, 130, 246, 0.0)');
 
-    const maxDataPoints = 60; // 1 minute of data if 1 sec updates
-
     const chart = new Chart(ctx, {
         type: 'line',
         data: {
@@ -80,14 +78,18 @@ document.addEventListener('DOMContentLoaded', () => {
                     type: 'linear',
                     display: true,
                     position: 'left',
+                    min: 0,
+                    max: 100,
                     grid: { color: 'rgba(255, 255, 255, 0.05)', drawBorder: false },
                     ticks: { color: '#ef4444', font: {family: 'Outfit'} },
-                    title: { display: true, text: 'Temperature (°C)', color: '#ef4444' }
+                    title: { display: true, text: 'Temperature (°F)', color: '#ef4444' }
                 },
                 y1: {
                     type: 'linear',
                     display: true,
                     position: 'right',
+                    min: 0,
+                    max: 100,
                     grid: { drawOnChartArea: false }, // Only draw grid lines for one axis
                     ticks: { color: '#3b82f6', font: {family: 'Outfit'} },
                     title: { display: true, text: 'Humidity (%)', color: '#3b82f6' }
@@ -96,7 +98,31 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
-    // WebSocket Connection
+    // Fetch History and start WebSocket Connection
+    async function init() {
+        try {
+            const res = await fetch('/history');
+            const data = await res.json();
+            data.history.forEach(item => {
+                const temp = parseFloat(item.temp);
+                const hum = parseFloat(item.humidity);
+                const timeStr = new Date(item.timestamp).toLocaleTimeString([], { hour12: false });
+                
+                chart.data.labels.push(timeStr);
+                chart.data.datasets[0].data.push(temp);
+                chart.data.datasets[1].data.push(hum);
+                
+                if (!isNaN(temp)) tempVal.textContent = temp.toFixed(1);
+                if (!isNaN(hum)) humVal.textContent = hum.toFixed(1);
+            });
+            chart.update('none');
+        } catch(e) {
+            console.error("Failed to load history", e);
+        }
+
+        connectWebSocket();
+    }
+
     function connectWebSocket() {
         // Determine WS protocol based on HTTP protocol
         const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
@@ -127,12 +153,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 chart.data.datasets[0].data.push(temp);
                 chart.data.datasets[1].data.push(hum);
 
-                // Keep only maxDataPoints
-                if (chart.data.labels.length > maxDataPoints) {
-                    chart.data.labels.shift();
-                    chart.data.datasets[0].data.shift();
-                    chart.data.datasets[1].data.shift();
-                }
+                // Keep all historical limit removed
 
                 chart.update('none'); // Update without full animation for a continuous flow
 
@@ -154,5 +175,5 @@ document.addEventListener('DOMContentLoaded', () => {
         };
     }
 
-    connectWebSocket();
+    init();
 });
