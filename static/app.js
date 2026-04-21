@@ -23,7 +23,7 @@ document.addEventListener('DOMContentLoaded', () => {
             labels: [], // Timestamps
             datasets: [
                 {
-                    label: 'Temperature (°C)',
+                    label: 'Temperature (°F)',
                     borderColor: '#ef4444',
                     backgroundColor: gradientTemp,
                     borderWidth: 2,
